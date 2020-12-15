@@ -12,7 +12,20 @@
   </ion-header>
 
   <div *ngIf="restaurants$ | async as restaurants">
-    <div *ngFor="let restau of restaurants">{{ restau | json }}</div>
+    <div *ngFor="let restau of restaurants">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-subtitle>{{restau.category}}</ion-card-subtitle>
+          <ion-card-title>{{restau.name}}</ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          {{restau.description}}
+          <br>
+          {{restau.address.street}} {{restau.address.zipcode}} {{restau.address.town}}
+        </ion-card-content>
+      </ion-card>
+    </div>
   </div>
   <div *ngIf="!restaurants$">loading...</div>
 </ion-content>

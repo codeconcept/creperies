@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
+import { Restaurant } from '../models/restaurant';
 import { RestaurantsService } from '../services/restaurants.service';
 
 @Component({
@@ -8,7 +10,7 @@ import { RestaurantsService } from '../services/restaurants.service';
   styleUrls: ['tab1.page.scss'],
 })
 export class Tab1Page implements OnInit {
-  restaurants$;
+  restaurants$: Observable<Restaurant[]>;
 
   constructor(private rs: RestaurantsService) {}
 
