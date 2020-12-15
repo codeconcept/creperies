@@ -1,8 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Carte
-    </ion-title>
+    <ion-title> Carte </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -13,8 +11,19 @@
     </ion-toolbar>
   </ion-header>
 
-  <div id="map" style="width: 100%; height: 100%">
-  </div>
+  <div id="map" style="width: 100%; height: 80%"></div>
 
+  <ion-select
+    placeholder="choisir une ville"
+    #ddlTown
+    (ionChange)="addMarkersForTown(ddlTown.value)"
+  >
+    <ion-select-option *ngFor="let town of towns" [value]="town"
+      >{{town}}</ion-select-option
+    >
+  </ion-select>
+  <div *ngIf="restaurants$ | async as restaurants">
+    <div *ngFor="let restau of restaurants">{{ restau.name }}</div>
+  </div>
   <app-explore-container name="Carte"></app-explore-container>
 </ion-content>

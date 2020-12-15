@@ -1,6 +1,11 @@
 import { Component } from '@angular/core';
 import * as L from 'leaflet';
 import * as GeoSearch from 'leaflet-geosearch';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { Address } from '../models/address';
+import { Restaurant } from '../models/restaurant';
+import { RestaurantsService } from '../services/restaurants.service';
 
 @Component({
   selector: 'app-tab2',
@@ -23,13 +28,15 @@ export class Tab2Page {
     shadowSize: [41, 41],
   });
   searchProvider;
-  
-  constructor() {}
-  
+  restaurants$: Observable<Restaurant[]>;
+  towns = ['Rennes', 'Liffré'];
+  markers = [];
+
+  constructor(private rs: RestaurantsService) {}
+
   ionViewDidEnter() {
     this.createMap();
     this.addSearch();
-    this.onSearch();
   }
 
   createMap() {
@@ -65,11 +72,12 @@ export class Tab2Page {
       open: false,
     };
     this.addMarker(popupOptions);
-    console.log(this.map.markers)
+    console.log(this.map.markers);
   }
 
   addMarker({ coords, text, open }) {
     const marker = L.marker([coords.lat, coords.lng], { icon: this.smallIcon });
+    this.markers = [marker, ...this.markers];
     console.log('addMarker | marker', marker);
     if (open) {
       marker.addTo(this.map).bindPopup(text).openPopup();
@@ -86,16 +94,37 @@ export class Tab2Page {
     this.map.addControl(search);
   }
 
-  async onSearch(address = 'Rennes, Parc du Thabor') {
-    const result = await this.searchProvider.search({ query: address });
+  async searchAndMark(address: Address, restaurantName: string) {
+    const formattedAddress = `${address.town}, ${address.street}, ${address.zipcode}`;
+    const result = await this.searchProvider.search({
+      query: formattedAddress,
+    });
     console.log(result);
     const firstResult = result[0];
+    const popupText = `${restaurantName} - ${address.street} - ${address.zipcode} ${address.town}`;
     const markerOptions = {
       coords: { lat: firstResult.y, lng: firstResult.x },
-      text: address,
+      text: popupText,
       open: false,
     };
     console.log('markerOptions', markerOptions);
     this.addMarker(markerOptions);
+  }
+
+  addMarkersForTown(town: string): void {
+    console.log('change!', town);
+    // delete all markers that are there due to previous search
+    this.deleteMarkers();
+    this.restaurants$ = this.rs.getRestaurantsByTown(town).pipe(
+      tap((result) => {
+        result.forEach((restau) => {
+          this.searchAndMark(restau.address, restau.name);
+        });
+      })
+    );
+  }
+
+  deleteMarkers() {
+    this.markers.forEach((marker) => this.map.removeLayer(marker));
   }
 }
