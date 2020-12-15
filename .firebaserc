@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "creperies-553e5": {
+      "hosting": {
+        "app": [
+          "creperies-553e5"
+        ]
+      }
+    }
+  }
+}
