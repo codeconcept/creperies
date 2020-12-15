@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import * as L from 'leaflet';
+import * as GeoSearch from 'leaflet-geosearch';
 
 @Component({
   selector: 'app-tab2',
@@ -21,32 +22,32 @@ export class Tab2Page {
       'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
     shadowSize: [41, 41],
   });
-
+  searchProvider;
+  
   constructor() {}
-
+  
   ionViewDidEnter() {
     this.createMap();
+    this.addSearch();
+    this.onSearch();
   }
 
   createMap() {
     const rennes = { lat: 48.117266, lng: -1.6777926 };
-    const zoomLevel = 14;
+    const zoomLevel = 12;
     // to prevent "map container is already initialized" error
-    if(!this.map) {
+    if (!this.map) {
       this.map = new L.Map('map').setView([rennes.lat, rennes.lng], zoomLevel);
     }
 
     const tileLayerURL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     // const tileLayerURL = 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
-    const mainLayer = L.tileLayer(
-      tileLayerURL,
-      {
-        minZoom: 12,
-        maxZoom: 17,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }
-    );
+    const mainLayer = L.tileLayer(tileLayerURL, {
+      minZoom: 12,
+      maxZoom: 17,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    });
 
     mainLayer.addTo(this.map);
     const descriptionWikipedia = `
@@ -64,14 +65,37 @@ export class Tab2Page {
       open: false,
     };
     this.addMarker(popupOptions);
+    console.log(this.map.markers)
   }
 
   addMarker({ coords, text, open }) {
     const marker = L.marker([coords.lat, coords.lng], { icon: this.smallIcon });
+    console.log('addMarker | marker', marker);
     if (open) {
       marker.addTo(this.map).bindPopup(text).openPopup();
     } else {
       marker.addTo(this.map).bindPopup(text);
     }
+  }
+
+  addSearch() {
+    this.searchProvider = new GeoSearch.OpenStreetMapProvider();
+    const search = new GeoSearch.GeoSearchControl({
+      provider: this.searchProvider,
+    });
+    this.map.addControl(search);
+  }
+
+  async onSearch(address = 'Rennes, Parc du Thabor') {
+    const result = await this.searchProvider.search({ query: address });
+    console.log(result);
+    const firstResult = result[0];
+    const markerOptions = {
+      coords: { lat: firstResult.y, lng: firstResult.x },
+      text: address,
+      open: false,
+    };
+    console.log('markerOptions', markerOptions);
+    this.addMarker(markerOptions);
   }
 }
