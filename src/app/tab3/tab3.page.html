@@ -1,8 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Tab 3
-    </ion-title>
+    <ion-title> Tab 3 </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -13,12 +11,16 @@
     </ion-toolbar>
   </ion-header>
 
-  <img *ngIf="photo" [src]="photo" alt="photo">
+  <div *ngIf="photo">
+    <img [src]="photo" alt="photo" />
+    <br>
+    <button (click)="save()">save to server</button>
+  </div>
   <ion-fab vertical="bottom" horizontal="center" slot="fixed">
     <ion-fab-button (click)="takePicture()">
       <ion-icon name="camera"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <!-- <app-explore-container name="Tab 3 page"></app-explore-container> -->
 </ion-content>
