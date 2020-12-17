@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CameraResultType, CameraSource, Plugins } from '@capacitor/core';
+import { Observable } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-tab3',
@@ -11,6 +13,8 @@ import { CameraResultType, CameraSource, Plugins } from '@capacitor/core';
 export class Tab3Page {
   photo: SafeResourceUrl;
   image;
+  uploadPercent;
+  downloadURL$: Observable<string>;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -32,10 +36,18 @@ export class Tab3Page {
 
   async save() {
     console.log(this.image);
-    const filePath = 'from-webcam';
+    const filePath = `from-webcam/${Date.now()}`;
     const ref = this.afs.ref(filePath);
     const file = this.dataURLtoFile(this.image.dataUrl, Date.now());
     const task = this.afs.upload(filePath, file);
+
+    // observe percentage changes
+    this.uploadPercent = task.percentageChanges();
+    // get notified when the download URL is available
+    task
+      .snapshotChanges()
+      .pipe(finalize(() => (this.downloadURL$ = ref.getDownloadURL())))
+      .subscribe();
   }
 
   // https://stackoverflow.com/questions/35940290/how-to-convert-base64-string-to-javascript-file-object-like-as-from-file-input-f
